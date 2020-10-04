@@ -95,7 +95,21 @@ def arrangeNormalLinearSystem(x_i, y_i, base, objectiveFunction):
     except:
         raise RuntimeError('Algo deu errado')
 
+def calculateR2(y_i, f_i):
+    SS_tot = 0
+    SS_res = 0
+    y_mean = sum(y_i) / len(y_i)
+
+    for i in range(len(y_i)):
+        SS_tot += (y_i[i] - y_mean) ** 2
+        SS_res += (y_i[i] - f_i[i]) ** 2
+
+    return 1 - (SS_res / SS_tot)
+
 def adjustDataToParabola(x_i, y_i):
+    n = len(x_i)
+
+    f_i = [None] * n
     base = [f_1, f_2, f_3]
 
     A, b = arrangeNormalLinearSystem(x_i, y_i, base, ident)
@@ -105,6 +119,12 @@ def adjustDataToParabola(x_i, y_i):
     print('a = ', a)
     print('b = ', b)
     print('c = ', c)
+
+    for i in range(n):
+        x = x_i[i]
+        f_i[i] = a * f_1(x) + b * f_2(x) + c * f_3(x)
+
+    print('R² do ajuste com 0 harmônicos: ', calculateR2(y_i, f_i))
 
     plot(x_i, y_i, a, b, c)
 
