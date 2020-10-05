@@ -16,6 +16,7 @@ Delta0 = []
 alphas = [0.1540327, 0.1237763, 0.2166085]
 
 Qs = []
+R2s = []
 
 def ident(t):
     return t
@@ -103,6 +104,7 @@ def calculateAdjustment(alpha, base):
     Delta0.append(Delta_0)
 
     R2 = calculateQAndR2(T_m, Delta_0, alpha)
+    R2s.append(R2)
     print('R² com alpha = ' + str(alpha) + ' => ' + str(R2))
 
 
@@ -155,8 +157,10 @@ def main():
     plot(t_i, T_i, Tm[best_fit], Delta0[best_fit], alphas[best_fit])
 
     #Resultados
+    print('\n\n')
     print('Melhor ajuste de T_m: ' + str(Tm[best_fit]))
     print('Melhor ajuste de Delta_0 (em módulo): ' + str(abs(Delta0[best_fit])))
     print('Melhor alpha: ' + str(alphas[best_fit]))
+    print('R² do melhor ajuste: ' + str(R2s[best_fit]))
 
 main()
