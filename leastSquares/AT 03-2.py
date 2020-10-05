@@ -37,7 +37,7 @@ def discreteScalarProduct(x, y, fx, fy):
     except:
         raise RuntimeError('Algo deu errado')
 
-def arrangeNormalLinearSystem(x_i, y_i, base, objectiveFunction, alpha):
+def arrangeNormalLinearSystem(x_i, y_i, base, objectiveFunction):
     try:
         size = len(base)
         A = np.zeros((size, size))
@@ -78,19 +78,33 @@ def adjustDataUsingLeastSquares():
 
     for alpha in alphas:
         currentAlpha = alpha
+        calculateAdjustment(alpha, base)
 
-        A, b = arrangeNormalLinearSystem(t_i, T_i, base, ident, alpha)
-        coefficients = np.linalg.solve(A, b)
+    # Dado que os dois primeiros valores estimados para alfa foram os com melhor R², portanto melhor ajuste,
+    # vamos varrer o intervalo entre eles para tentar encontrar valores ainda melhores para alfa.
+    # Além disso, também vale analisar alguns valores de alpha entre o segundo e o terceiro iniciais.
+    diff1 = abs(alphas[0] - alphas[1])
+    diff2 = abs(alphas[1] - alphas[2])
+    betterAlphas = [alphas[0] + (diff1 / 3), alphas[0] + (2 * diff1 / 3), alphas[1] + (diff2 / 5), alphas[1] + (2 * diff2 / 5), alphas[1] + (3 * diff2 / 5), alphas[1] + (4 * diff2 / 5)]
 
-        T_m, Delta_0 = coefficients[0], coefficients[1]
+    alphas.append(betterAlphas)
 
-        Tm.append(T_m)
-        Delta0.append(Delta_0)
+    for alpha in betterAlphas:
+        currentAlpha = alpha
+        calculateAdjustment(alpha, base)
 
-        plot(t_i, T_i, T_m, Delta_0, alpha)
+def calculateAdjustment(alpha, base):
+    A, b = arrangeNormalLinearSystem(t_i, T_i, base, ident)
+    coefficients = np.linalg.solve(A, b)
 
-        R2 = calculateQAndR2(T_m, Delta_0, alpha)
-        print('R² com alpha = ' + str(alpha) + ' => ' + str(R2))
+    T_m, Delta_0 = coefficients[0], coefficients[1]
+
+    Tm.append(T_m)
+    Delta0.append(Delta_0)
+
+    R2 = calculateQAndR2(T_m, Delta_0, alpha)
+    print('R² com alpha = ' + str(alpha) + ' => ' + str(R2))
+
 
 def plot(x_i, y_i, T_m, Delta_0, alpha):
     xI = 0
@@ -131,11 +145,18 @@ def plot(x_i, y_i, T_m, Delta_0, alpha):
 def main():
     adjustDataUsingLeastSquares()
 
-    print('Q', Qs)
-    print('T_m', Tm)
-    print('Delta0', Delta0)
+    # print('Q', Qs)
+    # print('T_m', Tm)
+    # print('Delta0', Delta0)
 
-    best_alpha = np.argmin(Qs)
-    print('best alpha', alphas[best_alpha])
+    best_fit = int(np.argmin(Qs))
+
+    #Plotar melhor ajuste
+    plot(t_i, T_i, Tm[best_fit], Delta0[best_fit], alphas[best_fit])
+
+    #Resultados
+    print('Melhor ajuste de T_m: ' + str(Tm[best_fit]))
+    print('Melhor ajuste de Delta_0 (em módulo): ' + str(abs(Delta0[best_fit])))
+    print('Melhor alpha: ' + str(alphas[best_fit]))
 
 main()
